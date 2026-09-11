@@ -6,6 +6,7 @@ const daysGrid = document.querySelector('#days-grid');
 const calendarHead = document.querySelector('#calendar-head');
 const modal = document.querySelector('#modal');
 const detailsModal = document.querySelector('#details-modal');
+const allAppointmentsModal = document.querySelector('#all-appointments-modal');
 const form = document.querySelector('#appointment-form');
 const datePicker = document.querySelector('#date-picker');
 const dateFormatter = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -72,12 +73,33 @@ function showAppointmentDetails(appointment) {
 
 function closeDetails() { detailsModal.classList.remove('open'); detailsModal.setAttribute('aria-hidden', 'true'); }
 
+function renderAllAppointments() {
+  const list = document.querySelector('#all-appointments-list');
+  list.innerHTML = '';
+  if (!appointments.length) {
+    list.innerHTML = '<p class="empty-appointments">Todavía no has agendado ninguna cita.</p>';
+    return;
+  }
+  [...appointments].sort((first, second) => `${first.date} ${first.time}`.localeCompare(`${second.date} ${second.time}`)).forEach((appointment) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'all-appointment-item';
+    item.innerHTML = `<span class="all-appointment-date">${dateFormatter.format(new Date(`${appointment.date}T00:00:00`))}<b>${appointment.time}</b></span><span class="all-appointment-info"><strong>${appointment.client}</strong><small>${appointment.service} · ${appointment.duration} min</small></span><span class="all-appointment-arrow">›</span>`;
+    item.addEventListener('click', () => { closeAllAppointments(); showAppointmentDetails(appointment); });
+    list.appendChild(item);
+  });
+}
+
+function showAllAppointments() { renderAllAppointments(); allAppointmentsModal.classList.add('open'); allAppointmentsModal.setAttribute('aria-hidden', 'false'); }
+function closeAllAppointments() { allAppointmentsModal.classList.remove('open'); allAppointmentsModal.setAttribute('aria-hidden', 'true'); }
+
 function deleteActiveAppointment() {
   if (!activeAppointment || !window.confirm(`¿Borrar la cita de ${activeAppointment.client}?`)) return;
   appointments = appointments.filter((item) => item !== activeAppointment);
   localStorage.setItem(storageKey, JSON.stringify(appointments));
   activeAppointment = null;
   closeDetails();
+  renderAllAppointments();
   renderCalendar();
 }
 
@@ -88,12 +110,16 @@ modal.addEventListener('click', (event) => { if (event.target === modal) toggleM
 document.querySelector('#close-details').addEventListener('click', closeDetails);
 detailsModal.addEventListener('click', (event) => { if (event.target === detailsModal) closeDetails(); });
 document.querySelector('#delete-details').addEventListener('click', deleteActiveAppointment);
+document.querySelector('#view-all-button').addEventListener('click', showAllAppointments);
+document.querySelector('#close-all-appointments').addEventListener('click', closeAllAppointments);
+allAppointmentsModal.addEventListener('click', (event) => { if (event.target === allAppointmentsModal) closeAllAppointments(); });
 form.addEventListener('submit', (event) => {
   event.preventDefault();
   const data = new FormData(form);
   const appointment = { client: data.get('client'), service: data.get('service').split(' · ')[0], date: data.get('date'), time: data.get('time'), duration: Number(data.get('service').match(/(\d+) min/)?.[1] || 60), note: data.get('note'), type: 'green' };
   appointments.push(appointment);
   localStorage.setItem(storageKey, JSON.stringify(appointments));
+  renderAllAppointments();
   setSelectedDate(new Date(`${appointment.date}T00:00:00`)); form.reset(); toggleModal(false);
 });
 datePicker.addEventListener('change', (event) => setSelectedDate(new Date(`${event.target.value}T00:00:00`)));
