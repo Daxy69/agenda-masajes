@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f5f0" />
+    <title>Serena | Agenda de masajes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">✳</span><span>serena</span></div>
+        <p class="workspace-label">ESTUDIO DE BIENESTAR</p>
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-item active" data-view="agenda"><span class="nav-icon">▦</span> Agenda</button>
+          <button class="nav-item" data-view="clients"><span class="nav-icon">♧</span> Clientes <span class="nav-count">24</span></button>
+          <button class="nav-item" data-view="services"><span class="nav-icon">◌</span> Servicios</button>
+        </nav>
+        <div class="sidebar-spacer"></div>
+        <div class="today-card">
+          <div class="today-icon">☼</div>
+          <div><strong>Un día para respirar</strong><span>Tu agenda está bajo control.</span></div>
+        </div>
+        <button class="nav-item settings"><span class="nav-icon">⚙</span> Ajustes</button>
+        <div class="profile"><div class="avatar">LM</div><div><strong>Lucía Méndez</strong><span>Administradora</span></div><span class="profile-more">•••</span></div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="breadcrumb"><span>Agenda</span><span class="slash">/</span><strong>Semana actual</strong></div>
+          <div class="top-actions"><button class="icon-button" aria-label="Buscar">⌕</button><button class="icon-button notification" aria-label="Notificaciones">♢<i></i></button><button class="add-button" id="open-modal"><span>+</span> Nueva cita</button></div>
+        </header>
+
+        <section class="page-heading">
+          <div><p class="eyebrow" id="heading-date">SEMANA ACTUAL</p><h1>Tu semana, en calma.</h1><p class="heading-subtitle">Revisa tus citas y prepara cada encuentro con presencia.</p></div>
+          <div class="heading-stats"><div><strong id="week-total">8</strong><span>citas esta semana</span></div><div class="stat-divider"></div><div><strong>92%</strong><span>ocupación</span></div></div>
+        </section>
+
+        <section class="toolbar"><div class="date-controls"><button class="round-button" id="previous-week" aria-label="Semana anterior">‹</button><button class="date-label" id="current-week">Cargando semana <span>⌄</span></button><button class="round-button" id="next-week" aria-label="Semana siguiente">›</button><button class="today-button" id="today-button">Hoy</button><input class="date-picker" id="date-picker" type="date" aria-label="Elegir cualquier fecha" /></div><div class="view-controls"><button class="view-button active">Semana</button><button class="view-button">Día</button><button class="filter-button">☷ <span>Filtrar</span></button></div></section>
+
+        <section class="calendar-card" aria-label="Calendario semanal">
+          <div class="calendar-head" id="calendar-head"><div class="timezone">GMT+1 <span>⌄</span></div></div>
+          <div class="calendar-grid" id="calendar-grid">
+            <div class="time-column"><span>08:00</span><span>09:00</span><span>10:00</span><span>11:00</span><span>12:00</span><span>13:00</span><span>14:00</span><span>15:00</span><span>16:00</span><span>17:00</span><span>18:00</span></div>
+            <div class="days-grid" id="days-grid"><div class="current-time" style="top: 340px"><span>10:42</span></div></div>
+          </div>
+        </section>
+        <footer class="calendar-footer"><span class="legend-dot green"></span> Confirmada <span class="legend-dot yellow"></span> Pendiente <span class="legend-dot pink"></span> Primera visita <span class="footer-tip">Arrastra una cita para cambiarla de hora</span></footer>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="modal" aria-hidden="true"><form class="modal" id="appointment-form"><div class="modal-header"><div><p class="eyebrow">NUEVA RESERVA</p><h2>Crear una cita</h2></div><button type="button" class="close-button" id="close-modal" aria-label="Cerrar">×</button></div><label>Nombre de cliente<input required name="client" placeholder="Ej. Ana García" /></label><label>Tipo de masaje<select name="service"><option>Masaje relajante · 60 min</option><option>Masaje descontracturante · 75 min</option><option>Drenaje linfático · 60 min</option><option>Ritual serenidad · 90 min</option></select></label><div class="form-row"><label>Día<input required type="date" name="date" /></label><label>Hora<input required type="time" name="time" value="10:00" /></label></div><label>Nota <textarea name="note" rows="2" placeholder="Algo que quieras recordar... "></textarea></label><div class="modal-actions"><button type="button" class="cancel-button" id="cancel-modal">Cancelar</button><button class="save-button" type="submit">Guardar cita</button></div></form></div>
+    <div class="modal-backdrop" id="details-modal" aria-hidden="true"><section class="modal appointment-details"><div class="modal-header"><div><p class="eyebrow">DETALLE DE LA CITA</p><h2 id="details-client">Cita</h2></div><button type="button" class="close-button" id="close-details" aria-label="Cerrar">×</button></div><div class="details-list"><div><span>Servicio</span><strong id="details-service"></strong></div><div><span>Fecha</span><strong id="details-date"></strong></div><div><span>Hora</span><strong id="details-time"></strong></div><div><span>Duración</span><strong id="details-duration"></strong></div><div><span>Nota</span><strong id="details-note"></strong></div></div><button type="button" class="delete-details-button" id="delete-details">Eliminar cita</button></section></div>
+    <style>.details-list{display:grid;gap:0;border-top:1px solid #e8e8e2}.details-list div{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid #e8e8e2}.details-list span{color:#929b94;font-size:11px}.details-list strong{color:#405046;font-size:12px;text-align:right}.appointment-details{max-width:430px}.delete-details-button{width:100%;margin-top:22px;border:0;border-radius:6px;padding:11px 15px;background:#c94f4f;color:#fff;font:600 11px 'DM Sans';cursor:pointer}.delete-details-button:hover{background:#a83d3d}</style>
+    <script src="app.js"></script>
+  </body>
+</html>
