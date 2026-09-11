@@ -59,6 +59,23 @@ function toggleModal(open) {
   if (open) { form.elements.date.value = toIso(selectedDate); form.elements.client.focus(); }
 }
 
+function getSelectedServices() {
+  return [...form.querySelectorAll('input[name="services"]:checked')].map((input) => ({
+    name: input.dataset.service,
+    duration: Number(input.dataset.duration),
+    price: Number(input.dataset.price)
+  }));
+}
+
+function updateServiceTotal() {
+  const services = getSelectedServices();
+  const totalDuration = services.reduce((total, service) => total + service.duration, 0);
+  const totalPrice = services.reduce((total, service) => total + service.price, 0);
+  document.querySelector('#service-total').textContent = services.length
+    ? `${services.length} masaje${services.length > 1 ? 's' : ''} · ${totalDuration} min · $${totalPrice.toLocaleString('es-MX')}`
+    : 'Selecciona al menos un masaje';
+}
+
 function showAppointmentDetails(appointment) {
   activeAppointment = appointment;
   document.querySelector('#details-client').textContent = appointment.client;
@@ -66,6 +83,7 @@ function showAppointmentDetails(appointment) {
   document.querySelector('#details-date').textContent = dateFormatter.format(new Date(`${appointment.date}T00:00:00`));
   document.querySelector('#details-time').textContent = appointment.time;
   document.querySelector('#details-duration').textContent = `${appointment.duration} minutos`;
+  document.querySelector('#details-price').textContent = appointment.price ? `$${appointment.price.toLocaleString('es-MX')}` : 'No registrado';
   document.querySelector('#details-note').textContent = appointment.note || 'Sin nota añadida';
   detailsModal.classList.add('open');
   detailsModal.setAttribute('aria-hidden', 'false');
@@ -116,12 +134,18 @@ allAppointmentsModal.addEventListener('click', (event) => { if (event.target ===
 form.addEventListener('submit', (event) => {
   event.preventDefault();
   const data = new FormData(form);
-  const appointment = { client: data.get('client'), service: data.get('service').split(' · ')[0], date: data.get('date'), time: data.get('time'), duration: Number(data.get('service').match(/(\d+) min/)?.[1] || 60), note: data.get('note'), type: 'green' };
+  const services = getSelectedServices();
+  if (!services.length) { form.querySelector('input[name="services"]').setCustomValidity('Selecciona al menos un masaje'); form.reportValidity(); return; }
+  const appointment = { client: data.get('client'), service: services.map((service) => `${service.name} · ${service.duration} min`).join(', '), services, price: services.reduce((total, service) => total + service.price, 0), date: data.get('date'), time: data.get('time'), duration: services.reduce((total, service) => total + service.duration, 0), note: data.get('note'), type: 'green' };
   appointments.push(appointment);
   localStorage.setItem(storageKey, JSON.stringify(appointments));
   renderAllAppointments();
-  setSelectedDate(new Date(`${appointment.date}T00:00:00`)); form.reset(); toggleModal(false);
+  setSelectedDate(new Date(`${appointment.date}T00:00:00`)); form.reset(); updateServiceTotal(); toggleModal(false);
 });
+form.querySelectorAll('input[name="services"]').forEach((input) => input.addEventListener('change', () => {
+  input.setCustomValidity('');
+  updateServiceTotal();
+}));
 datePicker.addEventListener('change', (event) => setSelectedDate(new Date(`${event.target.value}T00:00:00`)));
 document.querySelector('#today-button').addEventListener('click', () => setSelectedDate(new Date()));
 document.querySelector('#previous-week').addEventListener('click', () => { const date = new Date(selectedDate); date.setDate(date.getDate() - 7); setSelectedDate(date); });
